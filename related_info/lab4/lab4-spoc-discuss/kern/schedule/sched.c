@@ -3,6 +3,7 @@
 #include <proc.h>
 #include <sched.h>
 #include <assert.h>
+#include <stdio.h>
 
 void
 wakeup_proc(struct proc_struct *proc) {
@@ -19,6 +20,16 @@ schedule(void) {
     {
         current->need_resched = 0;
         last = (current == idleproc) ? &proc_list : &(current->list_link);
+
+        le = last;
+        do {
+            if ((le = list_next(le)) != &proc_list) {
+                next = le2proc(le, list_link);
+                if(next->pid == 3)
+                    cprintf(  "%s: pid[%d] state=%d\n", __func__, next->pid, next->state);
+            }
+        } while (le != last);
+
         le = last;
         do {
             if ((le = list_next(le)) != &proc_list) {

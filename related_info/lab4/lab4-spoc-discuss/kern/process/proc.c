@@ -419,6 +419,12 @@ proc_init(void) {
 	set_proc_name(initproc2, "init2");
     cprintf("proc_init:: Created kernel thread init_main--> pid: %d, name: %s\n",initproc1->pid, initproc1->name);
 	cprintf("proc_init:: Created kernel thread init_main--> pid: %d, name: %s\n",initproc2->pid, initproc2->name);
+
+    int pid3= kernel_thread(init_main, "init main3: Hello world!!", 0);
+    if (pid3 <= 0)
+        panic("create kernel thread init_main3 failed");
+    set_proc_name(find_proc(pid3), "hello3");
+
     assert(idleproc != NULL && idleproc->pid == 0);
 }
 
