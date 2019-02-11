@@ -54,7 +54,11 @@ idt_init(void) {
     /* Set the exception vector address */
     write_csr(stvec, &__alltraps);
     /* Allow kernel to access user memory */
+#ifdef RV_PRIV_SPEC_1_9
+    clear_csr(sstatus, SSTATUS_SUM); //SSTATUS_PUM
+#else
     set_csr(sstatus, SSTATUS_SUM);
+#endif
     /* Allow keyboard interrupt */
     set_csr(sie, MIP_SSIP);
 }
@@ -224,14 +228,8 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_MISALIGNED_LOAD:
             cprintf("Load address misaligned\n");
             break;
-        case CAUSE_LOAD_ACCESS:
-            cprintf("Load access fault\n");
-            break;
         case CAUSE_MISALIGNED_STORE:
             cprintf("AMO address misaligned\n");
-            break;
-        case CAUSE_STORE_ACCESS:
-            cprintf("Store/AMO access fault\n");
             break;
         case CAUSE_USER_ECALL:
             // cprintf("Environment call from U-mode\n");
@@ -252,6 +250,11 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_FETCH_PAGE_FAULT:
             panic("Instruction page fault\n");
             break;
+        case CAUSE_LOAD_ACCESS:
+            cprintf("Load access fault\n");
+#ifndef RV_PRIV_SPEC_1_9
+            break;
+#endif
         case CAUSE_LOAD_PAGE_FAULT:
             cprintf("Load page fault\n");
             if ((ret = pgfault_handler(tf)) != 0) {
@@ -269,6 +272,11 @@ void exception_handler(struct trapframe *tf) {
                 }
             }
             break;
+        case CAUSE_STORE_ACCESS:
+            cprintf("Store/AMO access fault\n");
+#ifndef RV_PRIV_SPEC_1_9
+            break;
+#endif
         case CAUSE_STORE_PAGE_FAULT:
             cprintf("Store/AMO page fault\n");
             if ((ret = pgfault_handler(tf)) != 0) {
