@@ -216,9 +216,6 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_MISALIGNED_FETCH:
             cprintf("Instruction address misaligned\n");
             break;
-        case CAUSE_FETCH_ACCESS:
-            cprintf("Instruction access fault\n");
-            break;
         case CAUSE_ILLEGAL_INSTRUCTION:
             cprintf("Illegal instruction\n");
             break;
@@ -247,6 +244,11 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_MACHINE_ECALL:
             cprintf("Environment call from M-mode\n");
             break;
+        case CAUSE_FETCH_ACCESS:
+            cprintf("Instruction access fault\n");
+#ifndef RV_PRIV_SPEC_1_9
+            break;
+#endif
         case CAUSE_FETCH_PAGE_FAULT:
             panic("Instruction page fault\n");
             break;
