@@ -152,7 +152,7 @@ static void enable_paging(void) {
     // set page table
 #ifdef RV_PRIV_SPEC_1_9
     write_csr(satp, (boot_cr3 >> RISCV_PGSHIFT));
-    set_csr(mstatus, (9<<24)); // Sv39
+    asm volatile ("sfence.vm");
 #else
 	write_csr(satp, (0x8000000000000000) | (boot_cr3 >> RISCV_PGSHIFT));
 #endif
