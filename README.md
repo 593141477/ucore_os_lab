@@ -4,8 +4,6 @@ uCore for riscv64 is a porting of [ucore_os_lab](https://github.com/chyyuu/ucore
 
 This uCore port runs on Kendryte K210 chip and QEMU.
 
-**关于移植的更多细节，请看 dosc/ucore_rv64_porting.md **
-
 # Quickstart
 
 ## Installing riscv-tools
