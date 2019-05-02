@@ -30,7 +30,7 @@ HOSTCFLAGS	:= -Wall -O2
 GDB		:= $(GCCPREFIX)gdb
 
 CC		:= $(GCCPREFIX)gcc
-CFLAGS  := -mcmodel=medany -O2 -std=gnu99 -Wno-unused
+CFLAGS  := -mcmodel=medany -Os -std=gnu99 -Wno-unused -g
 CFLAGS	+= -fno-builtin -Wall -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
@@ -41,6 +41,7 @@ LDFLAGS	+= -nostdlib --gc-sections
 
 OBJCOPY := $(GCCPREFIX)objcopy
 OBJDUMP := $(GCCPREFIX)objdump
+STRIP := $(GCCPREFIX)strip
 
 COPY	:= cp
 MKDIR   := mkdir -p
@@ -122,6 +123,7 @@ $$(__user_bin__): $(1) | $$$$(dir $$$$@)
 	$(V)$(LD) $(LDFLAGS) -T tools/user.ld -o $$@ $$(UOBJS) $(1)
 	@$(OBJDUMP) -S $$@ > $$(call cgtype,$$<,o,asm)
 	@$(OBJDUMP) -t $$@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$$$/d' > $$(call cgtype,$$<,o,sym)
+	$(STRIP) $$@
 endef
 
 $(foreach p,$(call read_packet,uprog),$(eval $(call uprog_ld,$(p))))
@@ -182,7 +184,7 @@ $(SFSROOT):
 	$(V)$(MKDIR) $@
 
 $(SFSIMG): $(SFSROOT) $(SFSBINS) | $(call totarget,mksfs)
-	$(V)dd if=/dev/zero of=$@ bs=1kB count=480
+	$(V)dd if=/dev/zero of=$@ bs=1kB count=400
 	@$(call totarget,mksfs) $@ $(SFSROOT)
 
 $(call create_target,sfs.img)
@@ -279,7 +281,7 @@ QEMUOPTS = -hda $(UCOREIMG) -drive file=$(SWAPIMG),media=disk,cache=writeback -d
 
 .PHONY: qemu spike
 qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
-	$(V)$(QEMU) -machine virt -kernel $(UCOREIMG) -nographic
+	$(V)$(QEMU) -machine virt -kernel $(UCOREIMG) -nographic -m 8M
 
 spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
